@@ -10,6 +10,10 @@ type AdultView = {
     title?: string;
     thumbnail?: string;
     description?: string;
+    duration?: string;
+    m3u8_url?: string;
+    mp4_url?: string;
+    categories?: Array<{ name?: string; slug?: string }>;
     streams?: Array<{ quality?: string; url?: string }>;
     sources?: Array<{ quality?: string; url?: string; label?: string }>;
   };
@@ -25,17 +29,24 @@ export default async function AdultDetail({
   if (!r) notFound();
   const d = r.data ?? {};
   const title = d.title ?? slug.replace(/-/g, " ");
-  const streams: Array<{ quality?: string; url?: string; label?: string }> = [
+  const extras: Array<{ quality?: string; url?: string; label?: string }> = [
     ...(d.streams ?? []),
     ...(d.sources ?? []),
   ];
-  const sources: VideoSource[] = streams
+  if (d.m3u8_url) extras.unshift({ label: "HLS", url: d.m3u8_url });
+  if (d.mp4_url) extras.push({ label: "MP4", url: d.mp4_url });
+  const sources: VideoSource[] = extras
     .filter((s) => s.url)
     .map((s) => ({
       label: s.quality ?? s.label ?? "Auto",
       url: s.url!,
       type: /\.m3u8(\?|$)/i.test(s.url!) ? "hls" : "mp4",
     }));
+  const genre = (d.categories ?? [])
+    .map((c) => c.name)
+    .filter(Boolean)
+    .slice(0, 4)
+    .join(" · ");
   return (
     <>
       <DetailHero
@@ -43,6 +54,8 @@ export default async function AdultDetail({
         poster={d.thumbnail}
         description={d.description}
         backHref="/18plus"
+        genre={genre || undefined}
+        year={d.duration}
       />
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 py-6">
         <VideoPlayer sources={sources} poster={d.thumbnail} />
