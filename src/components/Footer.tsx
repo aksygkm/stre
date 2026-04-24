@@ -1,7 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { HUBS } from "@/lib/providers";
 
 export default function Footer() {
+  const pathname = usePathname();
+
+  if (pathname === "/") return null;
+
   return (
     <footer className="mt-20 border-t border-white/5 bg-netflix-ink">
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 py-10 text-sm text-white/60">

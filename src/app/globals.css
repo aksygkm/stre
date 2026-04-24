@@ -75,3 +75,361 @@ body {
 iframe {
   color-scheme: normal;
 }
+
+/* ===== GREEK ATHENAEUM THEME ===== */
+
+/* Marble texture background */
+.marble-bg {
+  background:
+    radial-gradient(ellipse at 15% 30%, rgba(201, 169, 110, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 20%, rgba(180, 160, 140, 0.03) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 70%, rgba(201, 169, 110, 0.02) 0%, transparent 45%),
+    radial-gradient(ellipse at 30% 90%, rgba(160, 140, 120, 0.03) 0%, transparent 50%),
+    linear-gradient(180deg, #0D1117 0%, #0f1320 30%, #0D1117 60%, #080C12 100%);
+}
+
+/* Gold gradient text */
+.gold-text {
+  background: linear-gradient(
+    135deg,
+    #8B6914 0%,
+    #C9A96E 20%,
+    #D4AF37 40%,
+    #F5E6C8 50%,
+    #D4AF37 60%,
+    #C9A96E 80%,
+    #8B6914 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animated gold shimmer text */
+.gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    #8B6914 0%,
+    #C9A96E 20%,
+    #F5E6C8 40%,
+    #D4AF37 50%,
+    #F5E6C8 60%,
+    #C9A96E 80%,
+    #8B6914 100%
+  );
+  background-size: 400% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerGold 6s ease-in-out infinite;
+}
+
+/* Greek key / meander pattern border */
+.greek-key-border {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cpath d='M0 10 L0 0 L10 0 L10 8 L4 8 L4 4 L8 4 L8 6 L6 6 L6 2 L2 2 L2 10 L12 10 L12 20 L20 20 L20 0 L30 0 L30 8 L24 8 L24 4 L28 4 L28 6 L26 6 L26 2 L22 2 L22 10 L32 10 L32 20 L40 20 L40 10' fill='none' stroke='%23C9A96E' stroke-width='0.8' opacity='0.6'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 40px 20px;
+  height: 20px;
+}
+
+.greek-key-border-animated {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cpath d='M0 10 L0 0 L10 0 L10 8 L4 8 L4 4 L8 4 L8 6 L6 6 L6 2 L2 2 L2 10 L12 10 L12 20 L20 20 L20 0 L30 0 L30 8 L24 8 L24 4 L28 4 L28 6 L26 6 L26 2 L22 2 L22 10 L32 10 L32 20 L40 20 L40 10' fill='none' stroke='%23C9A96E' stroke-width='0.8' opacity='0.6'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 40px 20px;
+  height: 20px;
+  animation: meander 3s linear infinite;
+}
+
+/* Ornamental double line */
+.ornament-line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.ornament-line::before,
+.ornament-line::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 169, 110, 0.5),
+    transparent
+  );
+}
+
+/* Scroll reveal animation */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Golden particle */
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: radial-gradient(circle, #D4AF37, transparent);
+  border-radius: 50%;
+  animation: floatUp var(--duration, 12s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  left: var(--x, 50%);
+  opacity: 0;
+}
+
+/* Philosopher card */
+.philosopher-card {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(201, 169, 110, 0.06) 0%,
+    rgba(13, 17, 23, 0.9) 100%
+  );
+  border: 1px solid rgba(201, 169, 110, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.philosopher-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #C9A96E,
+    #D4AF37,
+    #C9A96E,
+    transparent
+  );
+}
+.philosopher-card:hover {
+  border-color: rgba(201, 169, 110, 0.4);
+  transform: translateY(-8px);
+  box-shadow:
+    0 20px 60px rgba(201, 169, 110, 0.15),
+    0 0 40px rgba(201, 169, 110, 0.1);
+}
+
+/* Virtue card */
+.virtue-card {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(201, 169, 110, 0.04) 0%,
+    rgba(13, 17, 23, 0.8) 50%,
+    rgba(201, 169, 110, 0.03) 100%
+  );
+  border: 1px solid rgba(201, 169, 110, 0.12);
+  border-radius: 12px;
+  padding: 2.5rem;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+.virtue-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(201, 169, 110, 0.08) 0%,
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.virtue-card:hover::after {
+  opacity: 1;
+}
+.virtue-card:hover {
+  border-color: rgba(201, 169, 110, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(201, 169, 110, 0.12);
+}
+
+/* Timeline */
+.timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(201, 169, 110, 0.5) 10%,
+    rgba(201, 169, 110, 0.5) 90%,
+    transparent 100%
+  );
+  transform: translateX(-50%);
+}
+.timeline-dot {
+  position: absolute;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle, #D4AF37, #8B6914);
+  border: 3px solid #0D1117;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 20px rgba(201, 169, 110, 0.4);
+  z-index: 2;
+}
+
+/* Gallery image */
+.gallery-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 169, 110, 0.1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gallery-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 40%,
+    rgba(13, 17, 23, 0.8) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.gallery-item:hover::after {
+  opacity: 1;
+}
+.gallery-item:hover {
+  border-color: rgba(201, 169, 110, 0.4);
+  box-shadow: 0 12px 40px rgba(201, 169, 110, 0.15);
+  transform: scale(1.02);
+}
+.gallery-item img {
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gallery-item:hover img {
+  transform: scale(1.08);
+}
+
+/* Parallax section */
+.parallax-section {
+  position: relative;
+  background-attachment: fixed;
+  background-position: center;
+  background-size: cover;
+}
+@media (max-width: 768px) {
+  .parallax-section {
+    background-attachment: scroll;
+  }
+}
+
+/* Greek scrollbar for the page */
+.greek-page ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8B6914, #C9A96E, #8B6914);
+  border-radius: 10px;
+}
+.greek-page ::-webkit-scrollbar-track {
+  background: #080C12;
+}
+
+/* Section divider ornament */
+.section-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 2rem 0;
+}
+.section-ornament::before,
+.section-ornament::after {
+  content: "";
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(201, 169, 110, 0.4)
+  );
+}
+.section-ornament::after {
+  background: linear-gradient(
+    90deg,
+    rgba(201, 169, 110, 0.4),
+    transparent
+  );
+}
+
+/* Stagger animations for children */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+.stagger.visible > *:nth-child(1) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(2) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(3) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(4) { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(5) { transition-delay: 0.5s; opacity: 1; transform: translateY(0); }
+
+/* Decorative corner ornaments */
+.corner-ornament {
+  position: relative;
+}
+.corner-ornament::before,
+.corner-ornament::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-color: rgba(201, 169, 110, 0.3);
+  border-style: solid;
+}
+.corner-ornament::before {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+}
+.corner-ornament::after {
+  bottom: 0;
+  right: 0;
+  border-width: 0 2px 2px 0;
+}
