@@ -20,8 +20,25 @@ type KStream = {
   };
 };
 
-function absolutizeDramaId(u: string): string {
+function decodeBase64Id(raw: string): string | null {
+  try {
+    const pad = raw + "=".repeat((4 - (raw.length % 4)) % 4);
+    const decoded = Buffer.from(pad, "base64").toString("utf-8");
+    if (/^https?:\/\//i.test(decoded)) return decoded;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function resolveStreamUrl(u: string): string {
   if (/^https?:\/\//i.test(u)) return u;
+  // /streaming/?action=stream-proxy&id=<base64-of-real-url>
+  const idMatch = u.match(/[?&]id=([^&]+)/);
+  if (idMatch) {
+    const decoded = decodeBase64Id(decodeURIComponent(idMatch[1]));
+    if (decoded) return decoded;
+  }
   return "https://drama-id.com" + (u.startsWith("/") ? u : "/" + u);
 }
 
@@ -42,11 +59,23 @@ export default async function KDramaWatch({
   const streams = d.data.streams ?? [];
   const sources: VideoSource[] = streams
     .filter((s) => s.url)
-    .map((s) => ({
-      label: `${s.resolution ?? "Auto"} · ${s.server ?? ""}`.trim(),
-      url: absolutizeDramaId(s.url),
-      type: "iframe" as const,
-    }));
+    .map((s) => {
+      const resolved = resolveStreamUrl(s.url);
+      const isMp4 = /\.mp4(\?|$)/i.test(resolved);
+      const isM3u8 = /\.m3u8(\?|$)/i.test(resolved);
+      return {
+        label: `${s.resolution ?? "Auto"} · ${s.server ?? ""}`.trim(),
+        url: resolved,
+        type: (isM3u8 ? "hls" : isMp4 ? "mp4" : "iframe") as VideoSource["type"],
+      };
+    });
+  if (sources.length === 0 && d.data.url) {
+    sources.push({
+      label: "Web Player",
+      url: d.data.url,
+      type: "iframe",
+    });
+  }
   return (
     <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 py-8">
       <div className="mb-4">

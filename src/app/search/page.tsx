@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Card from "@/components/Card";
 import { apiSafe } from "@/lib/api";
 import {
@@ -393,34 +394,6 @@ shortProviders.forEach((p) => {
   }
 });
 
-async function searchAll(q: string) {
-  if (!q.trim())
-    return {
-      movie: [] as CatalogItem[],
-      anime: [] as CatalogItem[],
-      kdrama: [] as CatalogItem[],
-      rapidtv: [] as CatalogItem[],
-      plus18: [] as CatalogItem[],
-      short: [] as { provider: string; label: string; items: CatalogItem[] }[],
-    };
-  const [mv, an, kr, rp, p18, shortResults] = await Promise.all([
-    searchMovie(q),
-    searchAnime(q),
-    searchKDrama(q),
-    searchRapidTv(q),
-    search18plus(q),
-    Promise.all(shortProviders.map((p) => searchShortProvider(p, q))),
-  ]);
-  return {
-    movie: mv,
-    anime: an,
-    kdrama: kr,
-    rapidtv: rp,
-    plus18: p18,
-    short: shortResults.filter((s) => s.items.length > 0),
-  };
-}
-
 function SearchGrid({
   title,
   items,
@@ -446,20 +419,53 @@ function SearchGrid({
   );
 }
 
-export default async function SearchPage({
+function SkeletonSection({ title }: { title: string }) {
+  return (
+    <section className="mb-10" aria-busy="true">
+      <h2 className="text-xl font-bold mb-3 text-white/40">{title}</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div
+            key={i}
+            className="aspect-[2/3] bg-white/5 rounded-md animate-pulse"
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+async function MovieSection({ q }: { q: string }) {
+  const items = await searchMovie(q);
+  return <SearchGrid title="🎬 Film & Serial" items={items} />;
+}
+async function AnimeSection({ q }: { q: string }) {
+  const items = await searchAnime(q);
+  return <SearchGrid title="✨ Anime" items={items} />;
+}
+async function KDramaSection({ q }: { q: string }) {
+  const items = await searchKDrama(q);
+  return <SearchGrid title="🇰🇷 Drama Korea" items={items} />;
+}
+async function RapidTvSection({ q }: { q: string }) {
+  const items = await searchRapidTv(q);
+  return <SearchGrid title="📡 RapidTV" items={items} />;
+}
+async function Plus18Section({ q }: { q: string }) {
+  const items = await search18plus(q);
+  return <SearchGrid title="🔞 18+" items={items} />;
+}
+async function ShortSection({ p, q }: { p: ProviderSearch; q: string }) {
+  const { items, label } = await searchShortProvider(p, q);
+  return <SearchGrid title={label} items={items} />;
+}
+
+export default function SearchPage({
   searchParams,
 }: {
   searchParams: { q?: string };
 }) {
   const q = (searchParams.q ?? "").trim();
-  const results = await searchAll(q);
-  const total =
-    results.movie.length +
-    results.anime.length +
-    results.kdrama.length +
-    results.rapidtv.length +
-    results.plus18.length +
-    results.short.reduce((a, c) => a + c.items.length, 0);
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-10 pt-16 pb-16">
@@ -478,8 +484,8 @@ export default async function SearchPage({
         </h1>
         {q && (
           <p className="text-white/60 mt-2">
-            Ditemukan {total} hasil dari Film, Anime, K-Drama, RapidTV, 18+, dan{" "}
-            {results.short.length} platform short drama.
+            Memindai Film, Anime, K-Drama, RapidTV, 18+, dan {shortProviders.length}{" "}
+            platform short drama — hasil muncul per-section saat selesai.
           </p>
         )}
       </header>
@@ -488,16 +494,32 @@ export default async function SearchPage({
           Ketik kata kunci di bar pencarian di atas.
         </div>
       )}
-      <SearchGrid title="🎬 Film & Serial" items={results.movie} />
-      <SearchGrid title="✨ Anime" items={results.anime} />
-      <SearchGrid title="🇰🇷 Drama Korea" items={results.kdrama} />
-      <SearchGrid title="📡 RapidTV" items={results.rapidtv} />
-      <SearchGrid title="🔞 18+" items={results.plus18} />
-      {results.short.map((s) => (
-        <SearchGrid key={s.provider} title={s.label} items={s.items} />
-      ))}
-      {q && total === 0 && (
-        <div className="text-white/60">Tidak ada hasil yang cocok.</div>
+      {q && (
+        <>
+          <Suspense fallback={<SkeletonSection title="🎬 Film & Serial" />}>
+            <MovieSection q={q} />
+          </Suspense>
+          <Suspense fallback={<SkeletonSection title="✨ Anime" />}>
+            <AnimeSection q={q} />
+          </Suspense>
+          <Suspense fallback={<SkeletonSection title="🇰🇷 Drama Korea" />}>
+            <KDramaSection q={q} />
+          </Suspense>
+          <Suspense fallback={<SkeletonSection title="📡 RapidTV" />}>
+            <RapidTvSection q={q} />
+          </Suspense>
+          <Suspense fallback={<SkeletonSection title="🔞 18+" />}>
+            <Plus18Section q={q} />
+          </Suspense>
+          {shortProviders.map((p) => (
+            <Suspense
+              key={p.provider}
+              fallback={<SkeletonSection title={p.label} />}
+            >
+              <ShortSection p={p} q={q} />
+            </Suspense>
+          ))}
+        </>
       )}
     </div>
   );

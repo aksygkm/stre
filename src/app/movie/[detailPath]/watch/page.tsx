@@ -20,8 +20,22 @@ type MovieDetail = {
     title: string;
     poster?: string;
     seasons?: Season[];
+    trailerUrl?: string;
   };
 };
+
+function isUpstreamBroken(u: string | undefined): boolean {
+  if (!u) return false;
+  try {
+    const url = new URL(u);
+    return (
+      url.hostname === "streamapi.web.id" &&
+      (url.pathname === "/player.php" || url.pathname === "/stream.php")
+    );
+  } catch {
+    return false;
+  }
+}
 
 export default async function WatchMovie({
   params,
@@ -42,8 +56,16 @@ export default async function WatchMovie({
   if (!season || !ep) notFound();
 
   const sources: VideoSource[] = [];
-  if (ep.playerUrl) sources.push({ label: "Player HD", url: ep.playerUrl, type: "iframe" });
-  if (ep.streamUrl) sources.push({ label: "Direct Stream", url: ep.streamUrl, type: "auto" });
+  const playerBroken = isUpstreamBroken(ep.playerUrl);
+  const streamBroken = isUpstreamBroken(ep.streamUrl);
+  const usablePlayer = ep.playerUrl && !playerBroken;
+  const usableStream = ep.streamUrl && !streamBroken;
+  if (usablePlayer) sources.push({ label: "Player HD", url: ep.playerUrl!, type: "iframe" });
+  if (usableStream) sources.push({ label: "Direct Stream", url: ep.streamUrl!, type: "auto" });
+  const upstreamDown = !usablePlayer && !usableStream && Boolean(ep.streamUrl || ep.playerUrl);
+  if (upstreamDown && d.trailerUrl) {
+    sources.push({ label: "Trailer", url: d.trailerUrl, type: "auto" });
+  }
 
   const idxInSeason = season.episodes.findIndex((x) => x.episode === ep.episode);
   const prevEp = idxInSeason > 0 ? season.episodes[idxInSeason - 1] : undefined;
@@ -72,6 +94,14 @@ export default async function WatchMovie({
         {ep.title && <p className="text-white/60 text-sm mt-1">{ep.title}</p>}
       </div>
       <VideoPlayer sources={sources} poster={d.poster} />
+      {upstreamDown && (
+        <div className="mt-4 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/40 text-yellow-200 text-sm">
+          Player film sedang tidak tersedia dari sumber (endpoint <code>streamapi.web.id</code> upstream merespons 404).
+          {d.trailerUrl
+            ? " Kamu bisa menonton trailer di atas sementara menunggu pemilik API memperbaiki."
+            : " Silakan coba judul lain atau section Drama Korea / Anime / Live TV yang sumbernya berbeda."}
+        </div>
+      )}
 
       <div className="mt-6 flex items-center justify-between">
         {prevEp ? (
